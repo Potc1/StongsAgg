@@ -17,8 +17,8 @@ print(formatted_time)
 
 def init_firebase():
     """Инициализировать Firebase приложение."""
-    #fb_credentials = st.secrets["firebase"]['my_project_settings']
-    cred = credentials.Certificate('utils/imoex2-firebase-adminsdk-fbsvc-53248c3bb0.json')
+    fb_credentials = st.secrets["firebase"]['my_project_settings']
+    cred = credentials.Certificate(fb_credentials)
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://imoex2-default-rtdb.europe-west1.firebasedatabase.app/'
     })
