@@ -3,6 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import db
 import time 
 import streamlit as st
+import json
 # Глобальный флаг обновления (можно установить в False для остановки)
 update = True
 
@@ -18,6 +19,8 @@ print(formatted_time)
 def init_firebase():
     """Инициализировать Firebase приложение."""
     fb_credentials = st.secrets["firebase"]['my_project_settings']
+    print(type(fb_credentials))
+    fb_credentials = json.loads(fb_credentials)
     cred = credentials.Certificate(fb_credentials)
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://imoex2-default-rtdb.europe-west1.firebasedatabase.app/'
