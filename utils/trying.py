@@ -21,9 +21,13 @@ def init_firebase():
     fb_credentials = st.secrets["firebase"]['my_project_settings']
     fb_credentials = dict(fb_credentials)
     cred = credentials.Certificate(fb_credentials)
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://imoex2-default-rtdb.europe-west1.firebasedatabase.app/'
-    })
+    try:
+        firebase_admin.delete_app(firebase_admin.get_app())
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://imoex2-default-rtdb.europe-west1.firebasedatabase.app/'
+        })
+    except Exception as e:
+        print(f"Ошибка во время инициализации бд {e}")
 
 
 def updateDB():
