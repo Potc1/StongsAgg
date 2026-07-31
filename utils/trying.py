@@ -3,8 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import db
 import time 
 import streamlit as st
-import json
-# Глобальный флаг обновления (можно установить в False для остановки)
+# Глобальный флаг обновления (можно установить в False для остановки) 
 update = True
 
 
@@ -18,17 +17,32 @@ print(formatted_time)
 
 def init_firebase():
     """Инициализировать Firebase приложение."""
+    #fb_credentials = st.secrets["firebase"]['my_project_settings']
     fb_credentials = st.secrets["firebase"]['my_project_settings']
     fb_credentials = dict(fb_credentials)
     cred = credentials.Certificate(fb_credentials)
     try:
-        firebase_admin.delete_app(firebase_admin.get_app())
         firebase_admin.initialize_app(cred, {
             'databaseURL': 'https://imoex2-default-rtdb.europe-west1.firebasedatabase.app/'
         })
     except Exception as e:
-        print(f"Ошибка во время инициализации бд {e}")
+        print(f"Ошибка во время инициализации БД {e}")
 
+def kill_firebase():
+    """
+        Убивает приложение если оно есть
+
+        Returns:
+        True, если ПО есть и все ок
+        False, если его не было 
+    """
+    try:
+        app = firebase_admin.get_app()
+        firebase_admin.delete_app(app=app)
+        return True
+    except ValueError as e:
+        print(f"Ошибка во время удаления экземпляра приложения БД: {e}")
+    return False
 
 def updateDB():
     """
@@ -112,10 +126,10 @@ def updateDB():
         print(f"Больше данных bonds_isin: {bonds_isin} shares_isin: {shares_isin}")
         print(f"Облигация: {bonds_isin}\n{bondsData.iloc[i]}")
         print(f"Акция: {shares_isin}\n{sharesData.iloc[i]}")  
-        firebase_admin.delete_app(firebase_admin.get_app())
+        kill_firebase()
         return False
 
-    firebase_admin.delete_app(firebase_admin.get_app())
+    kill_firebase()
     return True
 
 current_time = time.time()                                                                                                 
