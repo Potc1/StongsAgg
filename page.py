@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils.parser import startParse
 from utils.trying import updateDB
+from utils.trying import kill_firebase
 from state import set_data
 
 
@@ -26,6 +27,7 @@ if 'initialized' not in st.session_state:
 
 # Обновление БД по триггеру (вызывается один раз за сессию)
 if 'updated' not in st.session_state or not st.session_state['updated']:
+    temp = kill_firebase()
     success = updateDB()
     st.session_state['updated'] = success
 
