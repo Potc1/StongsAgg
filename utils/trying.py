@@ -60,7 +60,8 @@ def updateDB():
     # Определяем количество итераций как максимум из двух наборов данных
     length = max(bondsData.shape[0], sharesData.shape[0])
     counter = 0
-
+    func_shares_isin = ""
+    func_bonds_isin = ""
     try:
         for i in range(length):
             counter += 1
@@ -68,64 +69,59 @@ def updateDB():
             # Обновление акций
             if i < sharesData.shape[0] and update:
                 shares_isin = sharesData.iloc[i]['ISIN']
-                shares_ref = ref.child('Shares/' + shares_isin)
-
+                shares_ref = ref.child(f'Shares/{shares_isin}')
+                func_shares_isin = shares_isin
+                payload = {
+                        "HIGH": sharesData.iloc[i]['HIGH'],
+                        "ISIN": shares_isin,
+                        "LAST": sharesData.iloc[i]['LAST'],
+                        "LOTSIZE": int(sharesData.iloc[i]['LOTSIZE']),
+                        "LOW": sharesData.iloc[i]['LOW'],
+                        "NAME": sharesData.iloc[i]['SECNAME'],
+                        "OPEN": sharesData.iloc[i]['OPEN']
+                }
+                payload = {
+                        key: value
+                        for key, value in payload.items()
+                        if value is not None
+                }
                 if shares_ref.get() is not None:
-                    shares_ref.update({
-                        "HIGH": sharesData.iloc[i]['HIGH'],
-                        "ISIN": shares_isin,
-                        "LAST": sharesData.iloc[i]['LAST'],
-                        "LOTSIZE": int(sharesData.iloc[i]['LOTSIZE']),
-                        "LOW": sharesData.iloc[i]['LOW'],
-                        "NAME": sharesData.iloc[i]['SECNAME'],
-                        "OPEN": sharesData.iloc[i]['OPEN']
-                    })
+
+                    shares_ref.update(payload)
                 else:
-                    shares_ref.set({
-                        "HIGH": sharesData.iloc[i]['HIGH'],
-                        "ISIN": shares_isin,
-                        "LAST": sharesData.iloc[i]['LAST'],
-                        "LOTSIZE": int(sharesData.iloc[i]['LOTSIZE']),
-                        "LOW": sharesData.iloc[i]['LOW'],
-                        "NAME": sharesData.iloc[i]['SECNAME'],
-                        "OPEN": sharesData.iloc[i]['OPEN']
-                    })
+                    shares_ref.set(payload)
 
             # Обновление облигаций
             if i < bondsData.shape[0] and update:
                 bonds_isin = bondsData.iloc[i]['ISIN']
-                bonds_ref = ref.child('Bonds/' + bonds_isin)
-
+                bonds_ref = ref.child(f'Bonds/{bonds_isin}')
+                func_bonds_isin = bonds_isin
+                payload = {
+                    "HIGH": bondsData.iloc[i]['HIGH'],
+                    "ISIN": bonds_isin,
+                    "LAST": bondsData.iloc[i]['LAST'],
+                    "LOTVALUE": int(bondsData.iloc[i]['FACEVALUE']),
+                    "LOW": bondsData.iloc[i]['LOW'],
+                    "NAME": bondsData.iloc[i]['SECNAME'],
+                    "OPEN": bondsData.iloc[i]['OPEN'],
+                    "YIELD": bondsData.iloc[i]['YIELD'],
+                    "COUPONVALUE": bondsData.iloc[i]['COUPONVALUE']
+                }
+                payload = {
+                        key: value
+                        for key, value in payload.items()
+                        if value is not None
+                }
                 if bonds_ref.get() is not None:
-                    bonds_ref.update({
-                        "HIGH": bondsData.iloc[i]['HIGH'],
-                        "ISIN": bonds_isin,
-                        "LAST": bondsData.iloc[i]['LAST'],
-                        "LOTVALUE": int(bondsData.iloc[i]['FACEVALUE']),
-                        "LOW": bondsData.iloc[i]['LOW'],
-                        "NAME": bondsData.iloc[i]['SECNAME'],
-                        "OPEN": bondsData.iloc[i]['OPEN'],
-                        "YIELD": bondsData.iloc[i]['YIELD'],
-                        "COUPONVALUE": bondsData.iloc[i]['COUPONVALUE']
-                    })
+                    bonds_ref.update(payload)
                 else:
-                    bonds_ref.set({
-                        "HIGH": bondsData.iloc[i]['HIGH'],
-                        "ISIN": bondsData.iloc[i]['ISIN'],
-                        "LAST": bondsData.iloc[i]['LAST'],
-                        "LOTVALUE": int(bondsData.iloc[i]['FACEVALUE']),
-                        "LOW": bondsData.iloc[i]['LOW'],
-                        "NAME": bondsData.iloc[i]['SECNAME'],
-                        "OPEN": bondsData.iloc[i]['OPEN'],
-                        "YIELD": bondsData.iloc[i]['YIELD'],
-                        "COUPONVALUE": bondsData.iloc[i]['COUPONVALUE']
-                    })
+                    bonds_ref.set(payload)
 
     except Exception as e:
         print(f"Error occured while updating db: {e}\nОбновлено {counter} из {length}")
-        print(f"Больше данных bonds_isin: {bonds_isin} shares_isin: {shares_isin}")
-        print(f"Облигация: {bonds_isin}\n{bondsData.iloc[i]}")
-        print(f"Акция: {shares_isin}\n{sharesData.iloc[i]}")  
+        print(f"Больше данных bonds_isin: {func_bonds_isin} shares_isin: {func_shares_isin}")
+        print(f"Облигация: {func_bonds_isin}\n{bondsData.iloc[i]}")
+        print(f"Акция: {func_shares_isin}\n{sharesData.iloc[i]}")  
         kill_firebase()
         return False
 
